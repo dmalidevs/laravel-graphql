@@ -19,14 +19,24 @@ type Query {
     users(
         "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
         name: String @where(operator: "like")
-    ): [User!]! @paginate(defaultCount: 10)
+    ): [User!]! @paginate(defaultCount: 10) @guard
+
+    me: User @guard @auth
 
     posts: [Post!]!
         @paginate(defaultCount: 10)
         @orderBy(column: "created_at", direction: DESC)
     post(id: ID @eq): Post @find
-    postsResolver: [Post!]! @field(resolver:"App\\GraphQL\\Queries\\PostsResolver")
-    postResolver(id:ID!): Post @field(resolver:"App\\GraphQL\\Queries\\PostResolver")
+    postsResolver: [Post!]!
+        @field(resolver: "App\\GraphQL\\Queries\\PostsResolver")
+    postResolver(id: ID!): Post
+        @field(resolver: "App\\GraphQL\\Queries\\PostResolver")
+    loginTest(
+        email: String!
+        password: String!
+        device_name: String!
+    ): AccessTokenTest!
+        @field(resolver: "App\\GraphQL\\Mutations\\LoginTestResolver")
 }
 
 "Account of a person who utilizes this application."
@@ -60,7 +70,7 @@ type Mutation {
         title: String! @rules(apply: ["required", "min:3"])
         body: String! @rules(apply: ["required", "min:3"])
         user_id: ID!
-    ): Post @field(resolver:"App\\GraphQL\\Mutations\\CreatePostResolver")
+    ): Post @field(resolver: "App\\GraphQL\\Mutations\\CreatePostResolver")
     updatePost(
         title: String! @rules(apply: ["required", "min:3"])
         body: String! @rules(apply: ["required", "min:3"])
@@ -77,3 +87,7 @@ type Post {
     created_at: DateTime!
     updated_at: DateTime!
 }
+type AccessTokenTest {
+    token: String!
+}
+#import sanctum.graphql
