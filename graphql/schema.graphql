@@ -16,10 +16,8 @@ type Query {
     ): User @find
 
     "List multiple users."
-    users(
-        "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
-        name: String @where(operator: "like")
-    ): [User!]! @paginate(defaultCount: 10) @guard
+    users: [User!]! @all @guard @can(ability: "viewAny")
+
 
     me: User @guard @auth
 
@@ -50,6 +48,7 @@ type User {
     "Unique email address."
     email: String!
     posts: [Post!]! @hasMany
+    is_admin: Boolean! @method(name: "isAdmin")
 
     "When the email was verified."
     email_verified_at: DateTime
@@ -64,8 +63,7 @@ type Mutation {
     createPost(
         title: String! @rules(apply: ["required", "min:3"])
         body: String! @rules(apply: ["required", "min:3"])
-        user_id: ID!
-    ): Post @create
+    ): Post @create @guard @inject(context: "user.id", name: "user_id")
     createPostResolver(
         title: String! @rules(apply: ["required", "min:3"])
         body: String! @rules(apply: ["required", "min:3"])
@@ -75,9 +73,12 @@ type Mutation {
         title: String! @rules(apply: ["required", "min:3"])
         body: String! @rules(apply: ["required", "min:3"])
         id: ID!
-    ): Post @update
+    ): Post @update @guard @can(ability: "update", find: "id")
 
-    deletePost(id: ID! @eq): Post @delete
+    deletePost(id: ID! @eq): Post
+        @delete
+        @guard
+        @can(ability: "delete", find: "id")
 }
 type Post {
     id: ID!

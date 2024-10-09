@@ -9,9 +9,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\Contracts\HasApiTokens as HasApiTokensContract;
 
-class User extends Authenticatable implements HasApiTokensContract
-{
-    use HasFactory, Notifiable,HasApiTokens;
+class User extends Authenticatable implements HasApiTokensContract {
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -39,14 +38,16 @@ class User extends Authenticatable implements HasApiTokensContract
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
+    protected function casts(): array {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
-    public function posts(){
+    public function posts() {
         return $this->hasMany(Post::class);
+    }
+    public function isAdmin() {
+        return in_array($this->email, ['gisselle94@example.net']);
     }
 }
